@@ -58,7 +58,7 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
     GTFS <- GTFS %>%
           # add service_id
           inner_join(Freq %>%
-                           dplyr::select(trip_id, route_id), by = "trip_id") %>%
+                           select(trip_id, route_id), by = "trip_id") %>%
           
           # join selected cols from routes
           inner_join(read.delim(paste(dir_GTFS, "routes.txt", sep = "/"), sep=",", fileEncoding="UTF-8-BOM") %>% 
