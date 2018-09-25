@@ -27,15 +27,18 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
     # fase 2: recalculate travel time of the first trip starting from start time
     # read stop_times file
     GTFS <- read.delim(paste(dir_GTFS, "stop_times.txt", sep = "/"), sep=",", fileEncoding="UTF-8-BOM") %>%
-          select(trip_id, arrival_time, stop_id, stop_sequence) %>%
+          dplyr::select(trip_id, arrival_time, stop_id, stop_sequence) %>%
           
           # select only trips included in Freq      
           inner_join(Freq %>%
-          select(trip_id), by = "trip_id" )
+                           dplyr::select(trip_id), by = "trip_id" )
+    
+    # exclude trips that start later than 00:00:00
     GTFS <- GTFS %>%
           inner_join(GTFS %>%
                            subset(stop_sequence == 0 & arrival_time == "00:00:00", select = c(trip_id)),
                      by = "trip_id")
+    
     GTFS <- GTFS %>%
           mutate(arrival_time = chron(time = GTFS$arrival_time) + (startHH - 1)/24) %>%
           mutate(trip_id2 = paste(trip_id, "0", sep="_"))
@@ -64,7 +67,7 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
     GTFS <- GTFS %>%
           # add service_id
           inner_join(Freq %>%
-                           select(trip_id, route_id), by = "trip_id") %>%
+                           dplyr::select(trip_id, route_id), by = "trip_id") %>%
           
           # join selected cols from routes
           inner_join(read.delim(paste(dir_GTFS, "routes.txt", sep = "/"), sep=",", fileEncoding="UTF-8-BOM") %>% 
