@@ -16,7 +16,7 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
           
           # open and select frequency
           inner_join(read.delim(paste(dir_GTFS, "frequencies.txt", sep = "/"), sep=",", fileEncoding="UTF-8-BOM") %>%
-                           select(-exact_times, -start_time, -end_time) %>%
+                           dplyr::select(-exact_times, -start_time, -end_time) %>%
                            group_by(trip_id) %>% 
                            filter(headway_secs == min(headway_secs)) %>% 
                            filter(1:n() == 1), by = "trip_id") %>%
@@ -24,30 +24,13 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
           # add number of trips to be generated:
           mutate(no_trips = ceiling((endHH - startHH + 1)*60*60 / headway_secs))
     
-    # fase 2: recalculate travel time of the first trip starting from 00:00:00
+    # fase 2: recalculate travel time of the first trip starting from start time
     # read stop_times file
-    GTFS <- read.delim(paste(dir_GTFS, "stop_times.txt", sep = "/"), sep=",", fileEncoding="UTF-8-BOM") %>%
-          select(trip_id, arrival_time, stop_id, stop_sequence) %>%
-          
-          # select only trips included in Freq      
-          inner_join(Freq %>%
-          select(trip_id), by = "trip_id" )
-    
-    # recalculate departure times
-    GTFS <- bind_rows(
-          # select trips which start at 00:00:00
-          GTFS %>%
-                inner_join(GTFS %>%
-                      subset(stop_sequence == 0 & arrival_time == "00:00:00", select = c(trip_id)),
-                            by = "trip_id"),
-          
-          # select trips which do not start at 00:00:00 and made a correction of the first arrival time
-          GTFS %>%
-                inner_join(GTFS %>%
-                      subset(stop_sequence == 0 & arrival_time != "00:00:00", select = c(trip_id, arrival_time)),
-                            by = "trip_id") %>%
-                      mutate(arrival_time = as.factor(chron(times = arrival_time.x) - (chron(times = arrival_time.y)))) %>%
-                      select(trip_id, arrival_time, stop_id, stop_sequence)   ) %>%
+    GTFS <- GTFS %>%
+          inner_join(GTFS %>%
+                           subset(stop_sequence == 0 & arrival_time == "00:00:00", select = c(trip_id)),
+                     by = "trip_id")
+    GTFS <- GTFS %>%
           mutate(arrival_time = chron(time = GTFS$arrival_time) + (startHH - 1)/24) %>%
           mutate(trip_id2 = paste(trip_id, "0", sep="_"))
     
@@ -75,7 +58,7 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
     GTFS <- GTFS %>%
           # add service_id
           inner_join(Freq %>%
-                           select(trip_id, route_id), by = "trip_id") %>%
+                           dplyr::select(trip_id, route_id), by = "trip_id") %>%
           
           # join selected cols from routes
           inner_join(read.delim(paste(dir_GTFS, "routes.txt", sep = "/"), sep=",", fileEncoding="UTF-8-BOM") %>% 
@@ -93,7 +76,7 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
           filter(as.numeric(substr(arrival_time, 1, 2)) >= startHH, 
                  as.numeric(substr(arrival_time, 1, 2)) < endHH) %>%
           # select(-stop_id, -route_id, - stop_sequence, -trip_id2)
-          select(trip_id, arrival_time, stop_lat, stop_lon, route_short_name, route_color)
+          dplyr::select(trip_id, arrival_time, stop_lat, stop_lon, route_short_name, route_color, stop_id)
     
     rm(Freq)
     
@@ -103,7 +86,7 @@ GTFS_to_moveVis_Freq <- function(dir_GTFS, startHH = 6, endHH = 8, file_output =
                            group_by(trip_id) %>%
                            summarise(total = n()) %>%
                            filter(total != 1) %>%
-                           select(trip_id), by = "trip_id" ) %>%
+                           dplyr::select(trip_id), by = "trip_id" ) %>%
           
           # order rows by arrival time within trips
           arrange(trip_id, arrival_time) 
