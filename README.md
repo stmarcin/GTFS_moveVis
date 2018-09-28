@@ -3,7 +3,7 @@
 Scripts for playing with moveVis and transport (GTFS) data. Created for data provided by [*Consorcio de Transportes de Madrid*](https://www.crtm.es) (data can be found [here](http://datos.crtm.es)).
 The repo consist of two parts:
 
-1) [Part I](#part_1) that convert set of required GTFS files into one, which is then used by `moveVis` package:
+1) [Part I](##part_1) that convert set of required GTFS files into one, which is then used by `moveVis` package:
 
 2) [Part II](#part_2) is an example how to create a video showing movement of public tranpsort vehicles using `moveVis´ package.
 
