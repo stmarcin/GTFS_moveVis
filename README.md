@@ -134,3 +134,5 @@ write.csv(GTFS, paste("data_GTFS", "GTFS.csv", sep = "/"), row.names = F, quote 
 ## Part II {#part_2}
 
 Scirpt used to generate an example: suburban trains, metros and trams in Madrid.
+
+![alt text](https://github.com/stmarcin/GTFS_moveVis/blob/master/imgs/moveVis_eg1.jpeg)
