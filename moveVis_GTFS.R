@@ -7,6 +7,8 @@ GTFS <- read.csv("data_GTFS/GTFS.csv")
 GTFS$arrival_time <- as.POSIXct(strptime(GTFS$arrival_time, "%H:%M:%S", tz = "UTC"))
 GTFS$route_color <- paste("#", GTFS$route_color, sep="")
 
+GTFS$route_color <- gsub("#FFFFFF", "#606060", GTFS$route_color)
+
 conv_dir <- get_libraries()
 
 out_dir <- paste0(getwd(),"/test")
